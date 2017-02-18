@@ -52,17 +52,7 @@ class Tutorial1MouseListener(fife.IMouseListener):
 		fife.IMouseListener.__init__(self)
 		
 	def mousePressed(self, event):
-		# Mouse press was consumed by a PyChan widget so lets ignore it.
-		# Dont worry too much about this yet.  This will come into play once
-		# we have a GUI in place.
-		if event.isConsumedByWidgets():
-			return
-
-		clickpoint = fife.ScreenPoint(event.getX(), event.getY())
-
-		# Tell the application to move the player instance to the screen 
-		# coordinate where the user clicked.
-		self._application.movePlayer(clickpoint)
+		self._application.state += 1
 				
 	def mouseReleased(self, event):
 		pass
@@ -118,7 +108,8 @@ class Tutorial1Application(ApplicationBase):
 									self.engine.getRenderBackend())
 			
 		# True if we have a map loaded.  False otherwise.
-		self._mapLoaded = False
+		self._mapLoaded = True
+		self.state = 0
 
 		# Since we want to listen for mouse events lets save a reference to
 		# the event manager and create our event listener and attach it to 
@@ -179,18 +170,49 @@ class Tutorial1Application(ApplicationBase):
 		This function gets called every frame.  This is where you want to
 		call your main game logic code.
 		"""
-		
-		# On our first frame the map will be loaded and we will grab a reference
-		# to our camera, map and player instance.
-		if not self._mapLoaded:
+
+		if self.state == 0:
 			self.loadMap("../assets/maps/tutorial1map.xml")
-			
-			# Save a reference to the main camera.  "camera1" must exist on the
-			# map.
-			self._camera = self._map.getCamera("camera1")
-			
-			# Save a ref to the actor layer and player on the map.  There must 
-			# be a layer with an id of "actor_layer" and an instance with an id 
-			# of "player" for this to work.
-			self._actorlayer = self._map.getLayer("actor_layer")
-			self._player = self._actorlayer.getInstance("player")
+			self.state += 1
+		elif self.state == 2:
+			self.engine.changeScreenMode(
+				self.engine.getDeviceCaps().getNearestScreenMode(
+					800,
+					600,
+					self._settings.get("FIFE", "BitsPerPixel", "0"),
+					self._settings.get("FIFE", "RenderBackend", "OpenGL"),
+					self._settings.get("FIFE", "FullScreen", False)))
+			self._map.getCamera("camera1").setViewPort(fife.Rect(0, 0,
+				self.engine.getRenderBackend().getScreenWidth(),
+				self.engine.getRenderBackend().getScreenHeight()))
+			self._map.getCamera("camera1").refresh()
+			self.state += 1
+		elif self.state == 4:
+			self.engine.changeScreenMode(
+				self.engine.getDeviceCaps().getNearestScreenMode(
+					1440,
+					900,
+					self._settings.get("FIFE", "BitsPerPixel", "0"),
+					self._settings.get("FIFE", "RenderBackend", "OpenGL"),
+					self._settings.get("FIFE", "FullScreen", False)))
+			self._map.getCamera("camera1").setViewPort(fife.Rect(0, 0,
+				self.engine.getRenderBackend().getScreenWidth(),
+				self.engine.getRenderBackend().getScreenHeight()))
+			self._map.getCamera("camera1").refresh()
+			self.state += 1
+		elif self.state == 6:
+			self.engine.changeScreenMode(
+				self.engine.getDeviceCaps().getNearestScreenMode(
+					1024,
+					768,
+					self._settings.get("FIFE", "BitsPerPixel", "0"),
+					self._settings.get("FIFE", "RenderBackend", "OpenGL"),
+					self._settings.get("FIFE", "FullScreen", False)))
+			self._map.getCamera("camera1").setViewPort(fife.Rect(0, 0,
+				self.engine.getRenderBackend().getScreenWidth(),
+				self.engine.getRenderBackend().getScreenHeight()))
+			self._map.getCamera("camera1").refresh()
+			self.state += 1
+		elif self.state == 8:
+			self.quit()
+			self.state += 1
